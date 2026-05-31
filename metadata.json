@@ -1,0 +1,6 @@
+{
+  "name": "Genshin Import Project",
+  "description": "Interactive Flutter & Node.js MySQL Developer Studio for GachaMerch, showcasing fully functional front-end mockups, real-time database queries, live Bearer token validation, and course documentation exporter.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
