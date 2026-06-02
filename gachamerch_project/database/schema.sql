@@ -1,11 +1,12 @@
 -- Database Setup Script: MySQL DDL Setup Schema
 -- Project Case: GachaMerch - Genshin Import
--- Course: COSC6094 Mobile Hybrid Solution
 
+
+-- 1. Create database--
 CREATE DATABASE IF NOT EXISTS gachamerch_db;
 USE gachamerch_db;
 
--- 1. Users Table (Handles DB and External OAuth user instances)
+-- 2. Users Table (Handles DB and External OAuth user instances)
 CREATE TABLE IF NOT EXISTS users (
   id VARCHAR(50) PRIMARY KEY,
   username VARCHAR(100) NOT NULL UNIQUE,
@@ -15,18 +16,17 @@ CREATE TABLE IF NOT EXISTS users (
   token VARCHAR(100) -- To store generated alphanumeric bearer tokens
 );
 
--- 2a. Weapons Table (Stores Genshin Import inventory)
+-- 3. Weapons Table (Stores Genshin Import inventory)
 CREATE TABLE IF NOT EXISTS weapons (
   id VARCHAR(50) PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
-  type VARCHAR(50) NOT NULL, -- 'Sword', 'Bow', 'Polearm', 'Catalyst'
-  description TEXT,
+  type VARCHAR(50) NOT NULL, 
   stock INT NOT NULL DEFAULT 0,
   image VARCHAR(255),
   price DECIMAL(10, 2) NOT NULL
 );
 
--- 2b. Artifacts Table (Stores Genshin Import inventory)
+-- 4. Artifacts Table (Stores Genshin Import inventory)
 CREATE TABLE IF NOT EXISTS artifacts (
   id VARCHAR(50) PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
@@ -37,19 +37,20 @@ CREATE TABLE IF NOT EXISTS artifacts (
   price DECIMAL(10, 2) NOT NULL
 );
 
--- 3. Orders Table (Tracks purchased checkouts to calculate invoice/audit logs)
+-- 5. Orders Table (Tracks purchased checkouts to calculate invoice/audit logs)
 CREATE TABLE IF NOT EXISTS orders (
   id VARCHAR(50) PRIMARY KEY,
   details VARCHAR(255),
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert Default Seed Data for validation verification
+-- 6. Insert Default Seed Data for validation verification
 INSERT INTO users (id, username, password, role, email) VALUES
 ('usr-01', 'admin', 'password123', 'admin', 'admin@gachamerch.com'),
 ('usr-02', 'user', 'password123', 'user', 'user@gachamerch.com')
 ON DUPLICATE KEY UPDATE id=id;
 
+-- 7. Weapons--
 INSERT INTO weapons (id, name, type, description, stock, image, price) VALUES
 ('W01', 'A Thousand Blazing Suns', 'Claymore', 'A radiant greatsword said to have witnessed the extinction and rebirth of countless suns.', 25, 'assets/weapons/W01_A_Thousand_Blazing_Suns_Icon.png', 648000),
 ('W02', 'Absolution', 'Sword', 'A rapier once wielded by a deceiver who hid their identity behind countless disguises.', 25, 'assets/weapons/W02_Absolution_Icon.png', 648000),
@@ -67,7 +68,7 @@ INSERT INTO weapons (id, name, type, description, stock, image, price) VALUES
 ('W14', 'Gest of the Mighty Wolf', 'Claymore', 'A claymore carrying the pride and ferocity of a powerful wolf king.', 25, 'assets/weapons/W15_Gest_of_the_Mighty_Wolf_Icon.png', 648000)
 ON DUPLICATE KEY UPDATE id=id;
 
--- artifacts --
+-- 8. Artifacts --
 INSERT INTO artifacts (id, name, type, description, stock, image, price) VALUES
 ('A01', 'Maidens Distance Love', 'Flower of Life', 'A carefully preserved flower symbolizing pure affection and unwavering devotion.', 25, 'assets/artifacts/A01_Maidens_Distant_Love.png', 648000),
 ('A02', 'Thundersoother Diadem', 'Circlet of Logos', 'A ceremonial crown worn by those who sought protection from relentless thunderstorms.', 25, 'assets/artifacts/A02_Thundersoothers_Diadem.png', 648000),
