@@ -20,9 +20,11 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS weapons (
   id VARCHAR(50) PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
-  type VARCHAR(50) NOT NULL, 
+  type VARCHAR(50) NOT NULL,
+  description TEXT, 
   stock INT NOT NULL DEFAULT 0,
-  image VARCHAR(255),
+  image_icon VARCHAR(255),
+  image_full VARCHAR(255),
   price DECIMAL(10, 2) NOT NULL
 );
 
@@ -33,7 +35,7 @@ CREATE TABLE IF NOT EXISTS artifacts (
   type VARCHAR(50) NOT NULL,
   description TEXT,
   stock INT NOT NULL DEFAULT 0,
-  image VARCHAR(255),
+  image_icon VARCHAR(255),
   price DECIMAL(10, 2) NOT NULL
 );
 
@@ -51,25 +53,25 @@ INSERT INTO users (id, username, password, role, email) VALUES
 ON DUPLICATE KEY UPDATE id=id;
 
 -- 7. Weapons--
-INSERT INTO weapons (id, name, type, description, stock, image, price) VALUES
-('W01', 'A Thousand Blazing Suns', 'Claymore', 'A radiant greatsword said to have witnessed the extinction and rebirth of countless suns.', 25, 'assets/weapons/W01_A_Thousand_Blazing_Suns_Icon.png', 648000),
-('W02', 'Absolution', 'Sword', 'A rapier once wielded by a deceiver who hid their identity behind countless disguises.', 25, 'assets/weapons/W02_Absolution_Icon.png', 648000),
-('W03', 'Aqua Simulacra', 'Bow', 'A longbow whose elegant appearance conceals immense and unpredictable power.', 25, 'assets/weapons/W03_Aqua_Simulacra_Icon.png', 648000),
-('W04', 'Cashflow Supervision', 'Catalyst', 'A floating monitoring device that was repurposed after being abandoned.', 25, 'assets/weapons/W04_Cashflow_Supervision_Icon.png', 648000),
-('W05', 'Crimson Moon Semblance', 'Polearm', 'A blood-red polearm that reflects the eerie brilliance of a crimson moon.', 25, 'assets/weapons/W05_Crimson_Moons_Semblance_Icon.png', 648000),
-('W06', 'Fang of the Mountain', 'Claymore', 'A mighty weapon inspired by the strength and authority of a legendary mountain ruler.', 25, 'assets/weapons/W06_Fang_of_the_Mountain_King_Icon.png', 648000),
-('W07', 'Everlasting Moonglow', 'Catalyst', 'A divine vessel that shines with a gentle light reminiscent of the eternal moon.', 25, 'assets/weapons/W07_Everlasting_Moonglow_Icon.png', 648000),
-('W08', 'Haran Geppaku Futsu', 'Sword', 'A renowned blade whose name evokes storms, waves, and moonlit elegance.', 25, 'assets/weapons/W09_Haran_Geppaku_Futsu_Icon.png', 648000),
-('W09', 'Engulfing Lightning', 'Polearm', 'A polearm embodying the overwhelming force and eternity of thunder itself.', 25, 'assets/weapons/W10_Engulfing_Lightning_Icon.png', 648000),
-('W10', 'Memory of Dust', 'Catalyst', 'A catalyst containing ancient memories preserved within golden dust.', 25, 'assets/weapons/W11_Memory_of_Dust_Icon.png', 648000),
-('W11', 'Fractured Halo', 'Catalyst', 'A catalyst bearing the remnants of a shattered sacred halo.', 25, 'assets/weapons/W12_Fractured_Halo_Icon.png', 648000),
-('W12', 'Polar Star', 'Bow', 'A bow that guides its wielder like the steadfast star illuminating the northern sky.', 25, 'assets/weapons/W13_Polar_Star_Icon.png', 648000),
-('W13', 'Golden Frostbound Oath', 'Bow', 'A bow forged from a vow that endures through ice, gold, and time itself.', 25, 'assets/weapons/W14_Golden_Frostbound_Oath_Icon.png', 648000),
-('W14', 'Gest of the Mighty Wolf', 'Claymore', 'A claymore carrying the pride and ferocity of a powerful wolf king.', 25, 'assets/weapons/W15_Gest_of_the_Mighty_Wolf_Icon.png', 648000)
+INSERT INTO weapons (id, name, type, description, stock, image_icon, image_full, price) VALUES
+('W01', 'A Thousand Blazing Suns', 'Claymore', 'A radiant greatsword said to have witnessed the extinction and rebirth of countless suns.', 25, 'assets/weapons/W01_A_Thousand_Blazing_Suns_Icon.png', 'assets/weapons/W01_A_Thousand_Blazing_Suns_full.png', 648000),
+('W02', 'Absolution', 'Sword', 'A rapier once wielded by a deceiver who hid their identity behind countless disguises.', 25, 'assets/weapons/W02_Absolution_Icon.png', 'assets/weapons/W02_Absolution_Full.png', 648000),
+('W03', 'Aqua Simulacra', 'Bow', 'A longbow whose elegant appearance conceals immense and unpredictable power.', 25, 'assets/weapons/W03_Aqua_Simulacra_Icon.png', 'assets/weapons/W03_Aqua_Simulacra_Full.png', 648000),
+('W04', 'Cashflow Supervision', 'Catalyst', 'A floating monitoring device that was repurposed after being abandoned.', 25, 'assets/weapons/W04_Cashflow_Supervision_Icon.png', 'assets/weapons/W04_Cashflow_Supervision_Full.png', 648000),
+('W05', 'Crimson Moon Semblance', 'Polearm', 'A blood-red polearm that reflects the eerie brilliance of a crimson moon.', 25, 'assets/weapons/W05_Crimson_Moons_Semblance_Icon.png', 'assets/weapons/W05_Crimson_Moons_Semblance_Full.png', 648000),
+('W06', 'Fang of the Mountain', 'Claymore', 'A mighty weapon inspired by the strength and authority of a legendary mountain ruler.', 25, 'assets/weapons/W06_Fang_of_the_Mountain_King_Icon.png', 'assets/weapons/W06_Fang_of_the_Mountain_King_Full.png', 648000),
+('W07', 'Everlasting Moonglow', 'Catalyst', 'A divine vessel that shines with a gentle light reminiscent of the eternal moon.', 25, 'assets/weapons/W07_Everlasting_Moonglow_Icon.png', 'assets/weapons/W07_Everlasting_Moonglow_Full.png', 648000),
+('W08', 'Haran Geppaku Futsu', 'Sword', 'A renowned blade whose name evokes storms, waves, and moonlit elegance.', 25, 'assets/weapons/W09_Haran_Geppaku_Futsu_Icon.png', 'assets/weapons/W09_Haran_Geppaku_Futsu_Full.png', 648000),
+('W09', 'Engulfing Lightning', 'Polearm', 'A polearm embodying the overwhelming force and eternity of thunder itself.', 25, 'assets/weapons/W10_Engulfing_Lightning_Icon.png', 'assets/weapons/W10_Engulfing_Lightning_Full.png', 648000),
+('W10', 'Memory of Dust', 'Catalyst', 'A catalyst containing ancient memories preserved within golden dust.', 25, 'assets/weapons/W11_Memory_of_Dust_Icon.png', 'assets/weapons/W11_Memory_of_Dust_Full.png', 648000),
+('W11', 'Fractured Halo', 'Catalyst', 'A catalyst bearing the remnants of a shattered sacred halo.', 25, 'assets/weapons/W12_Fractured_Halo_Icon.png', 'assets/weapons/W12_Fractured_Halo_Full.png', 648000),
+('W12', 'Polar Star', 'Bow', 'A bow that guides its wielder like the steadfast star illuminating the northern sky.', 25, 'assets/weapons/W13_Polar_Star_Icon.png', 'assets/weapons/W13_Polar_Star_Full.png', 648000),
+('W13', 'Golden Frostbound Oath', 'Bow', 'A bow forged from a vow that endures through ice, gold, and time itself.', 25, 'assets/weapons/W14_Golden_Frostbound_Oath_Icon.png', 'assets/weapons/W14_Golden_Frostbound_Oath_Full.png', 648000),
+('W14', 'Gest of the Mighty Wolf', 'Claymore', 'A claymore carrying the pride and ferocity of a powerful wolf king.', 25, 'assets/weapons/W15_Gest_of_the_Mighty_Wolf_Icon.png', 'assets/weapons/W15_Gest_of_the_Mighty_Wolf_Full.png', 648000)
 ON DUPLICATE KEY UPDATE id=id;
 
 -- 8. Artifacts --
-INSERT INTO artifacts (id, name, type, description, stock, image, price) VALUES
+INSERT INTO artifacts (id, name, type, description, stock, image_icon, price) VALUES
 ('A01', 'Maidens Distance Love', 'Flower of Life', 'A carefully preserved flower symbolizing pure affection and unwavering devotion.', 25, 'assets/artifacts/A01_Maidens_Distant_Love.png', 648000),
 ('A02', 'Thundersoother Diadem', 'Circlet of Logos', 'A ceremonial crown worn by those who sought protection from relentless thunderstorms.', 25, 'assets/artifacts/A02_Thundersoothers_Diadem.png', 648000),
 ('A03', 'Frost Weaved Dignity', 'Goblet of Eonothem', 'An ornate vessel embodying the pride and resilience of a land bound by ice.', 25, 'assets/artifacts/A03_Frost-Weaved_Dignity.png', 648000),

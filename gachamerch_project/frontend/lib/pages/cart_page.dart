@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../theme.dart';
 
 class CartPage extends StatefulWidget {
   final List<Weapon> initialCart;
@@ -74,13 +75,13 @@ class _CartPageState extends State<CartPage> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: AppColors.surface,
             title: const Text("Order Completed",
                 style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+                    color: AppColors.textDark, fontWeight: FontWeight.bold)),
             content: const Text(
               "Your checkout transaction was successfully processed and logged to the central database. Stock amounts have been updated safely.",
-              style: TextStyle(color: Color(0xFFE2E8F0)),
+              style: TextStyle(color: AppColors.textMuted),
             ),
             actions: [
               TextButton(
@@ -90,7 +91,7 @@ class _CartPageState extends State<CartPage> {
                 },
                 child: const Text("EXCELLENT",
                     style: TextStyle(
-                        color: Color(0xFFF59E0B), fontWeight: FontWeight.bold)),
+                        color: AppColors.primary, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -121,12 +122,12 @@ class _CartPageState extends State<CartPage> {
     final double totalPrice = _calculateTotalSum();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Checkout Cart",
             style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF1E293B),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textDark,
         elevation: 0,
       ),
       body: Column(
@@ -138,10 +139,10 @@ class _CartPageState extends State<CartPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.shopping_cart_outlined,
-                            size: 64, color: Color(0xFF334155)),
+                            size: 64, color: AppColors.border),
                         SizedBox(height: 16),
                         Text("Your shopping cart is currently empty.",
-                            style: TextStyle(color: Color(0xFF94A3B8))),
+                            style: TextStyle(color: AppColors.highlight)),
                       ],
                     ),
                   )
@@ -154,10 +155,10 @@ class _CartPageState extends State<CartPage> {
                       final int quantity = item['quantity'];
 
                       return Card(
-                        color: const Color(0xFF1E293B),
+                        color: AppColors.surface,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: const BorderSide(color: Color(0xFF334155)),
+                          side: const BorderSide(color: AppColors.border),
                         ),
                         margin: const EdgeInsets.only(bottom: 12),
                         child: ListTile(
@@ -165,21 +166,22 @@ class _CartPageState extends State<CartPage> {
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0F172A),
+                              color: AppColors.background,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: weapon.image.isNotEmpty
-                                ? Image.asset(weapon.getAssetPath(), fit: BoxFit.contain)
+                                ? Image.asset(weapon.getAssetPath(),
+                                    fit: BoxFit.contain)
                                 : const Icon(Icons.shield,
-                                    color: Color(0xFF475569)),
+                                    color: AppColors.textMuted),
                           ),
                           title: Text(weapon.name,
                               style: const TextStyle(
-                                  color: Colors.white,
+                                  color: AppColors.textDark,
                                   fontWeight: FontWeight.bold)),
                           subtitle: Text(
                             "${weapon.price.toStringAsFixed(0)} Primogems x $quantity",
-                            style: const TextStyle(color: Color(0xFF94A3B8)),
+                            style: const TextStyle(color: AppColors.highlight),
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -187,7 +189,7 @@ class _CartPageState extends State<CartPage> {
                               Text(
                                 "${(weapon.price * quantity).toStringAsFixed(0)} Primogems",
                                 style: const TextStyle(
-                                    color: Color(0xFFF59E0B),
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(width: 8),
@@ -208,8 +210,8 @@ class _CartPageState extends State<CartPage> {
           if (groupedCart.isNotEmpty)
             Container(
               padding: const EdgeInsets.all(24.0),
-              decoration: const BoxDecoration(
-                color: Color(0xFF1E293B),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Column(
@@ -220,12 +222,12 @@ class _CartPageState extends State<CartPage> {
                     children: [
                       const Text("SUBTOTAL SUM",
                           style: TextStyle(
-                              color: Color(0xFF94A3B8),
+                              color: AppColors.highlight,
                               fontWeight: FontWeight.bold)),
                       Text(
                         "${totalPrice.toStringAsFixed(0)} Primogems",
                         style: const TextStyle(
-                            color: Color(0xFFF59E0B),
+                            color: AppColors.primary,
                             fontSize: 20,
                             fontWeight: FontWeight.bold),
                       ),
@@ -238,8 +240,8 @@ class _CartPageState extends State<CartPage> {
                     child: ElevatedButton(
                       onPressed: _isProcessing ? null : _processCheckout,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF59E0B),
-                        foregroundColor: Colors.black,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

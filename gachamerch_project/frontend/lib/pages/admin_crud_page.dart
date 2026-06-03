@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../theme.dart';
 
 class AdminCrudPage extends StatefulWidget {
   const AdminCrudPage({super.key});
@@ -61,12 +62,12 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: AppColors.surface,
               scrollable: true,
               title: Text(
                 isEditing ? "Modify Weapon Profile" : "Add Legendary Commodity",
                 style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
+                    color: AppColors.primary, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
                 width: 400,
@@ -77,12 +78,12 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     TextField(
                       controller: idController,
                       enabled: !isEditing,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: "Unique Weapon Code ID (e.g. W06)",
-                        labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                        labelStyle: const TextStyle(color: AppColors.primary),
                         enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF334155))),
+                            borderSide: BorderSide(color: AppColors.border)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -90,12 +91,12 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     // Weapon Name Input
                     TextField(
                       controller: nameController,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.black),
                       decoration: const InputDecoration(
                         labelText: "Weapon Name",
-                        labelStyle: TextStyle(color: Color(0xFF94A3B8)),
+                        labelStyle: TextStyle(color: AppColors.primary),
                         enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF334155))),
+                            borderSide: BorderSide(color: AppColors.border)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -103,11 +104,11 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     // Category dropdown
                     DropdownButtonFormField<String>(
                       value: typeController.text,
-                      dropdownColor: const Color(0xFF1E293B),
-                      style: const TextStyle(color: Colors.white),
+                      dropdownColor: AppColors.surface,
+                      style: const TextStyle(color: AppColors.textDark),
                       decoration: const InputDecoration(
                         labelText: "Commodity Classification Category",
-                        labelStyle: TextStyle(color: Color(0xFF94A3B8)),
+                        labelStyle: TextStyle(color: AppColors.primary),
                       ),
                       items: () {
                         final dropdownItems = [
@@ -152,13 +153,13 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     // Description text box
                     TextField(
                       controller: descriptionController,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textDark),
                       maxLines: 3,
                       decoration: const InputDecoration(
                         labelText: "Historical Description Lore",
-                        labelStyle: TextStyle(color: Color(0xFF94A3B8)),
+                        labelStyle: TextStyle(color: AppColors.primary),
                         enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF334155))),
+                            borderSide: BorderSide(color: AppColors.border)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -167,12 +168,12 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     TextField(
                       controller: stockController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.black),
                       decoration: const InputDecoration(
                         labelText: "Available Stock Amount",
-                        labelStyle: TextStyle(color: Color(0xFF94A3B8)),
+                        labelStyle: TextStyle(color: AppColors.primary),
                         enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF334155))),
+                            borderSide: BorderSide(color: AppColors.border)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -181,12 +182,12 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     TextField(
                       controller: priceController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.black),
                       decoration: const InputDecoration(
                         labelText: "Value Price in Primogems",
-                        labelStyle: TextStyle(color: Color(0xFF94A3B8)),
+                        labelStyle: TextStyle(color: AppColors.primary),
                         enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF334155))),
+                            borderSide: BorderSide(color: AppColors.border)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -194,12 +195,12 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     // Image Url
                     TextField(
                       controller: imageController,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.black),
                       decoration: const InputDecoration(
                         labelText: "Remote Image URL Link",
-                        labelStyle: TextStyle(color: Color(0xFF94A3B8)),
+                        labelStyle: TextStyle(color: AppColors.primary),
                         enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF334155))),
+                            borderSide: BorderSide(color: AppColors.border)),
                       ),
                     ),
                   ],
@@ -209,7 +210,8 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text("CANCEL",
-                      style: TextStyle(color: Color(0xFF64748B))),
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 222, 154, 71))),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -244,8 +246,8 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF59E0B),
-                    foregroundColor: Colors.black,
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                   ),
                   child: Text(isEditing ? "SAVE CHANGES" : "PROVISION WEAPON"),
                 ),
@@ -261,7 +263,7 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         title: const Text("Purge Weapon",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         content: const Text(
@@ -270,7 +272,7 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: const Text("CANCEL",
-                style: TextStyle(color: Color(0xFF94A3B8))),
+                style: TextStyle(color: Color.fromARGB(255, 222, 154, 71))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -298,72 +300,73 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("GachaMerch Database CRUD Panel"),
-        backgroundColor: const Color(0xFF1E293B),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textDark,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Color(0xFF10B981), size: 28),
+            icon: const Icon(Icons.add, color: AppColors.textDark, size: 28),
             onPressed: () => _openWeaponFormDialog(),
-            tooltip: "Add Weapon",
+            tooltip: "Add Product",
           ),
         ],
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFFF59E0B)))
+              child: CircularProgressIndicator(color: AppColors.primary))
           : _weaponsList.isEmpty
               ? const Center(
                   child: Text("No items in inventory database.",
-                      style: TextStyle(color: Color(0xFF94A3B8))))
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 222, 154, 71))))
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: _weaponsList.length,
                   itemBuilder: (context, index) {
                     final item = _weaponsList[index];
                     return Card(
-                      color: const Color(0xFF1E293B),
+                      color: AppColors.surface,
                       margin: const EdgeInsets.only(bottom: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
-                        side: const BorderSide(color: Color(0xFF334155)),
+                        side: const BorderSide(color: AppColors.border),
                       ),
                       child: ListTile(
                         leading: Container(
                           width: 50,
                           height: 50,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0F172A),
+                            color: AppColors.background,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: item.image.isNotEmpty
                               ? Image.asset(item.getAssetPath(),
                                   fit: BoxFit.contain)
                               : const Icon(Icons.shield,
-                                  color: Color(0xFF475569)),
+                                  color: AppColors.textMuted),
                         ),
                         title: Text(item.name,
                             style: const TextStyle(
-                                color: Colors.white,
+                                color: AppColors.textDark,
                                 fontWeight: FontWeight.bold)),
                         subtitle: Text(
                           "ID: ${item.id}  |  Type: ${item.type}  |  Stock: ${item.stock}",
                           style: const TextStyle(
-                              color: Color(0xFF94A3B8), fontSize: 12),
+                              color: AppColors.textMuted, fontSize: 12),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               icon: const Icon(Icons.edit,
-                                  color: Color(0xFF60A5FA)),
+                                  color: Color.fromARGB(255, 141, 102, 55)),
                               onPressed: () => _openWeaponFormDialog(item),
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete_outline,
-                                  color: Colors.redAccent),
+                                  color: Color.fromARGB(255, 237, 14, 14)),
                               onPressed: () => _deleteWeapon(item.id),
                             ),
                           ],

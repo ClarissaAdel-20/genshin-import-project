@@ -100,7 +100,7 @@ app.get('/api/weapons', async (req, res) => {
 
 // 3. Weapons - Create (Admin functionality)
 app.post('/api/weapons', async (req, res) => {
-  const { id, name, type, description, stock, image, price } = req.body;
+  const { id, name, type, description, stock, image_icon, image_full, price } = req.body;
   if (!id || !name || !type || stock === undefined || !price) {
     return res.status(400).json({ error: 'Missing required parameters' });
   }
@@ -111,10 +111,19 @@ app.post('/api/weapons', async (req, res) => {
                        ['flower', 'plume', 'sands', 'goblet', 'circlet', 'relic'].some(keyword => type.toLowerCase().includes(keyword));
     const targetTable = isArtifact ? 'artifacts' : 'weapons';
 
-    await db.query(
-      `INSERT INTO ${targetTable} (id, name, type, description, stock, image, price) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, name, type, description || '', stock, image || '', price]
-    );
+    if (isArtifact) {
+      // Artifacts only have image_icon
+      await db.query(
+        `INSERT INTO ${targetTable} (id, name, type, description, stock, image_icon, price) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [id, name, type, description || '', stock, image_icon || '', price]
+      );
+    } else {
+      // Weapons have both image_icon and image_full
+      await db.query(
+        `INSERT INTO ${targetTable} (id, name, type, description, stock, image_icon, image_full, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [id, name, type, description || '', stock, image_icon || '', image_full || '', price]
+      );
+    }
 
     addLog('WEAPON_CREATE', 'success', `Created ${isArtifact ? 'artifact' : 'weapon'} ${name} (ID: ${id})`);
     res.status(201).json({ message: 'Item created successfully', weapon: req.body });
@@ -128,7 +137,7 @@ app.post('/api/weapons', async (req, res) => {
 // 4. Weapons - Update (Admin functionality)
 app.put('/api/weapons/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, type, description, stock, image, price } = req.body;
+  const { name, type, description, stock, image_icon, image_full, price } = req.body;
 
   try {
     const db = await getDbPool();
@@ -136,10 +145,20 @@ app.put('/api/weapons/:id', async (req, res) => {
                        ['flower', 'plume', 'sands', 'goblet', 'circlet', 'relic'].some(keyword => type.toLowerCase().includes(keyword));
     const targetTable = isArtifact ? 'artifacts' : 'weapons';
 
-    const [result] = await db.query(
-      `UPDATE ${targetTable} SET name=?, type=?, description=?, stock=?, image=?, price=? WHERE id=?`,
-      [name, type, description || '', stock, image || '', price, id]
-    );
+    let result;
+    if (isArtifact) {
+      // Artifacts only have image_icon
+      [result] = await db.query(
+        `UPDATE ${targetTable} SET name=?, type=?, description=?, stock=?, image_icon=?, price=? WHERE id=?`,
+        [name, type, description || '', stock, image_icon || '', price, id]
+      );
+    } else {
+      // Weapons have both image_icon and image_full
+      [result] = await db.query(
+        `UPDATE ${targetTable} SET name=?, type=?, description=?, stock=?, image_icon=?, image_full=?, price=? WHERE id=?`,
+        [name, type, description || '', stock, image_icon || '', image_full || '', price, id]
+      );
+    }
 
     if (result.affectedRows > 0) {
       addLog('WEAPON_UPDATE', 'success', `Updated item credentials for ID: ${id}`);

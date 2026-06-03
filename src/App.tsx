@@ -706,6 +706,8 @@ export default function App() {
   
   // Selected single weapon in emulator
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
+  // Fullscreen description modal weapon
+  const [fullDetailWeapon, setFullDetailWeapon] = useState<Weapon | null>(null);
   
   // Shopping Cart state
   const [cart, setCart] = useState<Array<{ weapon: Weapon; quantity: number }>>([]);
@@ -1039,6 +1041,35 @@ export default function App() {
         </div>
       </header>
 
+      {fullDetailWeapon && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="max-w-3xl w-full p-6 bg-[#07101a] rounded-lg border border-black/20 text-inherit">
+            <div className="flex justify-between items-start">
+              <h2 className="text-lg font-bold">{fullDetailWeapon.name}</h2>
+              <button
+                onClick={() => setFullDetailWeapon(null)}
+                className="text-sm text-gray-300 bg-black/10 px-2 py-1 rounded hover:bg-black/20"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 flex flex-col md:flex-row gap-4 items-center">
+              <img
+                src={fullDetailWeapon.image}
+                alt={fullDetailWeapon.name}
+                className="w-full md:w-1/2 h-auto object-contain drop-shadow"
+              />
+              <div className="md:flex-1 text-[14px] leading-relaxed text-gray-200">
+                <div className="text-sm text-gray-400 mb-2">{fullDetailWeapon.type}</div>
+                <p>{fullDetailWeapon.description}</p>
+                <div className="mt-3 text-[13px] font-mono text-emerald-400">{fullDetailWeapon.price.toLocaleString()} Primogems</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* WORKSPACE SECTIONS GRID */}
       <div id="main-panel-layout" className="flex-1 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
         
@@ -1224,6 +1255,12 @@ export default function App() {
                             </div>
 
                             <div className="flex gap-1 mt-2">
+                              <button
+                                onClick={() => setFullDetailWeapon(w)}
+                                className="flex-1 p-1 bg-black/10 hover:bg-black/20 text-[9px] rounded font-semibold text-center border border-black/5 cursor-pointer text-inherit"
+                              >
+                                Description
+                              </button>
                               <button
                                 onClick={() => {
                                   setSelectedWeapon(w);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import 'weapon_detail_page.dart';
+import '../theme.dart';
+import 'product_detail_page.dart';
 import 'cart_page.dart';
 import 'admin_crud_page.dart';
 import 'login_page.dart';
@@ -70,18 +71,19 @@ class _StorePageState extends State<StorePage> {
     final isAdmin = ApiService.currentSession?.role == "admin";
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("GachaMerch Shop",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: const Color(0xFF1E293B),
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: AppColors.textDark)),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         actions: [
           // Admin panel direct link trigger if isAdmin
           if (isAdmin)
             IconButton(
               icon: const Icon(Icons.admin_panel_settings,
-                  color: Color(0xFF60A5FA)),
+                  color: Color.fromARGB(255, 180, 147, 108)),
               tooltip: "Admin Hub",
               onPressed: () async {
                 await Navigator.push(
@@ -98,7 +100,7 @@ class _StorePageState extends State<StorePage> {
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.shopping_cart, color: Color(0xFFF59E0B)),
+                icon: const Icon(Icons.shopping_cart, color: AppColors.primary),
                 tooltip: "Shopping Cart",
                 onPressed: () async {
                   await Navigator.push(
@@ -142,7 +144,8 @@ class _StorePageState extends State<StorePage> {
           Tooltip(
             message: "Logout",
             child: IconButton(
-              icon: const Icon(Icons.logout, color: Color(0xFF94A3B8)),
+              icon: const Icon(Icons.logout,
+                  color: Color.fromARGB(255, 56, 34, 8)),
               tooltip: "Logout",
               onPressed: () {
                 ApiService.logout();
@@ -160,18 +163,18 @@ class _StorePageState extends State<StorePage> {
           // Banner Section
           Container(
             padding: const EdgeInsets.all(16.0),
-            color: const Color(0xFF1E293B),
+            color: AppColors.surface,
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: const Color(0xFF0F172A),
+                  backgroundColor: AppColors.primary,
                   child: Text(
                     ApiService.currentSession?.username
                             .substring(0, 1)
                             .toUpperCase() ??
                         "U",
                     style: const TextStyle(
-                        color: Color(0xFFF59E0B), fontWeight: FontWeight.bold),
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -181,14 +184,15 @@ class _StorePageState extends State<StorePage> {
                     Text(
                       "Welcome, ${ApiService.currentSession?.username ?? 'Visitor'}",
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.textDark,
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
                     Text(
                       "Privilege: ${ApiService.currentSession?.role.toUpperCase() ?? 'USER'}",
                       style: const TextStyle(
-                          color: Color(0xFF94A3B8), fontSize: 12),
+                          color: Color.fromARGB(255, 246, 190, 121),
+                          fontSize: 12),
                     ),
                   ],
                 ),
@@ -228,13 +232,13 @@ class _StorePageState extends State<StorePage> {
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? const Color(0xFFF59E0B)
-                          : const Color(0xFF1E293B),
+                          ? const Color.fromARGB(255, 246, 222, 165)
+                          : const Color.fromARGB(255, 236, 199, 147),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected
-                            ? const Color(0xFFF59E0B)
-                            : const Color(0xFF334155),
+                            ? const Color.fromARGB(255, 171, 128, 49)
+                            : AppColors.border,
                       ),
                     ),
                     child: Center(
@@ -257,11 +261,12 @@ class _StorePageState extends State<StorePage> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFFF59E0B)))
+                    child: CircularProgressIndicator(color: AppColors.primary))
                 : filteredWeapons.isEmpty
                     ? const Center(
                         child: Text("No weapon commodities found in inventory.",
-                            style: TextStyle(color: Color(0xFF94A3B8))))
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 146, 89, 19))))
                     : GridView.builder(
                         padding: const EdgeInsets.all(16),
                         gridDelegate:
@@ -278,23 +283,22 @@ class _StorePageState extends State<StorePage> {
 
                           return GestureDetector(
                             onTap: () async {
-                              final added = await Navigator.push<bool>(
+                              await Navigator.push<bool>(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      WeaponDetailPage(weapon: weapon),
+                                  builder: (context) => ProductDetailPage(
+                                    weapons: filteredWeapons,
+                                    initialIndex: index,
+                                    onAddToCart: () => _onAddToCart(weapon),
+                                  ),
                                 ),
                               );
-                              if (added == true) {
-                                _onAddToCart(weapon);
-                              }
                             },
                             child: Card(
-                              color: const Color(0xFF1E293B),
+                              color: const Color.fromARGB(255, 225, 179, 113),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                side:
-                                    const BorderSide(color: Color(0xFF334155)),
+                                side: const BorderSide(color: AppColors.border),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -303,7 +307,8 @@ class _StorePageState extends State<StorePage> {
                                   Expanded(
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF0F172A),
+                                        color: const Color.fromARGB(
+                                            255, 243, 227, 204),
                                         borderRadius:
                                             const BorderRadius.vertical(
                                                 top: Radius.circular(12)),
@@ -317,7 +322,7 @@ class _StorePageState extends State<StorePage> {
                                       ),
                                       child: weapon.image.isEmpty
                                           ? const Icon(Icons.shield,
-                                              color: Color(0xFF475569),
+                                              color: AppColors.textMuted,
                                               size: 48)
                                           : null,
                                     ),
@@ -333,7 +338,7 @@ class _StorePageState extends State<StorePage> {
                                         Text(
                                           weapon.name,
                                           style: const TextStyle(
-                                              color: Colors.white,
+                                              color: AppColors.textDark,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 14),
                                           maxLines: 1,
@@ -342,7 +347,7 @@ class _StorePageState extends State<StorePage> {
                                         Text(
                                           weapon.type,
                                           style: const TextStyle(
-                                              color: Color(0xFF94A3B8),
+                                              color: AppColors.highlight,
                                               fontSize: 11),
                                         ),
                                         const SizedBox(height: 6),
@@ -353,7 +358,7 @@ class _StorePageState extends State<StorePage> {
                                             Text(
                                               "${weapon.price.toStringAsFixed(0)} Primogems",
                                               style: const TextStyle(
-                                                  color: Color(0xFFF59E0B),
+                                                  color: AppColors.primary,
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 12),
                                             ),
@@ -364,7 +369,7 @@ class _StorePageState extends State<StorePage> {
                                               style: TextStyle(
                                                 color: outOfStock
                                                     ? Colors.red
-                                                    : const Color(0xFF10B981),
+                                                    : AppColors.textDark,
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -385,17 +390,98 @@ class _StorePageState extends State<StorePage> {
                                         onPressed: outOfStock
                                             ? null
                                             : () => _onAddToCart(weapon),
-                                        style: ElevatedButton.styleFrom(
+                                        style: ButtonStyle(
                                           backgroundColor:
-                                              const Color(0xFF334155),
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(6),
+                                              MaterialStateProperty.resolveWith(
+                                                  (states) {
+                                            if (states.contains(
+                                                MaterialState.hovered)) {
+                                              return Colors.green[700];
+                                            }
+                                            if (states.contains(
+                                                MaterialState.disabled)) {
+                                              return AppColors.border
+                                                  .withOpacity(0.4);
+                                            }
+                                            return AppColors.border;
+                                          }),
+                                          foregroundColor:
+                                              MaterialStateProperty.all(
+                                                  Colors.white),
+                                          shape: MaterialStateProperty.all(
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
                                           ),
-                                          padding: EdgeInsets.zero,
+                                          padding: MaterialStateProperty.all(
+                                              EdgeInsets.zero),
                                         ),
                                         child: const Text("QUICK ADD",
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                  ),
+
+                                  // View full details button
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 12, right: 12, bottom: 12),
+                                    child: SizedBox(
+                                      height: 32,
+                                      child: OutlinedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProductDetailPage(
+                                                weapons: filteredWeapons,
+                                                initialIndex: index,
+                                                onAddToCart: () =>
+                                                    _onAddToCart(weapon),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        style: ButtonStyle(
+                                          foregroundColor:
+                                              MaterialStateProperty.all(
+                                                  AppColors.primary),
+                                          side:
+                                              MaterialStateProperty.resolveWith(
+                                                  (states) {
+                                            if (states.contains(
+                                                MaterialState.hovered)) {
+                                              return const BorderSide(
+                                                  color: Color(0xFF8B3F2F),
+                                                  width: 1.5);
+                                            }
+                                            return const BorderSide(
+                                                color: AppColors.primary);
+                                          }),
+                                          overlayColor:
+                                              MaterialStateProperty.resolveWith(
+                                                  (states) {
+                                            if (states.contains(
+                                                MaterialState.hovered)) {
+                                              return AppColors.primary
+                                                  .withOpacity(0.15);
+                                            }
+                                            return null;
+                                          }),
+                                          shape: MaterialStateProperty.all(
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                          ),
+                                          padding: MaterialStateProperty.all(
+                                              EdgeInsets.zero),
+                                        ),
+                                        child: const Text("DESCRIPTION",
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.bold)),

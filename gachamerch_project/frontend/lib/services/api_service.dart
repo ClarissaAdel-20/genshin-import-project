@@ -7,8 +7,11 @@ class Weapon {
   final String type;
   final String description;
   final int stock;
-  final String image;
+  final String imageIcon;
+  final String imageFull;
   final double price;
+
+  String get image => imageIcon;
 
   Weapon({
     required this.id,
@@ -16,11 +19,16 @@ class Weapon {
     required this.type,
     required this.description,
     required this.stock,
-    required this.image,
+    String? image,
+    String? imageIcon,
+    String? imageFull,
     required this.price,
-  });
+  })  : imageIcon = imageIcon ?? image ?? '',
+        imageFull = imageFull ?? image ?? '';
 
   factory Weapon.fromJson(Map<String, dynamic> json) {
+    final icon = json['image_icon'] ?? json['image'] ?? '';
+    final full = json['image_full'] ?? json['image'] ?? '';
     return Weapon(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
@@ -29,7 +37,8 @@ class Weapon {
       stock: json['stock'] is int
           ? json['stock']
           : int.tryParse(json['stock'].toString()) ?? 0,
-      image: json['image'] ?? '',
+      imageIcon: icon,
+      imageFull: full,
       price: json['price'] is num
           ? (json['price'] as num).toDouble()
           : double.tryParse(json['price'].toString()) ?? 0.0,
@@ -43,24 +52,23 @@ class Weapon {
       'type': type,
       'description': description,
       'stock': stock,
-      'image': image,
+      'image_icon': imageIcon,
+      'image_full': imageFull,
       'price': price,
     };
   }
 
   // Get the asset path normalized for Flutter asset loading
-  String getAssetPath() {
-    if (image.isEmpty) return '';
-    // Remove './' prefix if present and normalize slashes
-    String path =
-        image.replaceFirst(RegExp(r'^\.\/'), '').replaceAll('\\', '/');
+  String getAssetPath([String? imagePath]) {
+    final pathToNormalize = (imagePath ?? imageIcon).trim();
+    if (pathToNormalize.isEmpty) return '';
 
-    // Ensure we return a path that starts with assets/
+    String path = pathToNormalize
+        .replaceFirst(RegExp(r'^\.\/'), '')
+        .replaceAll('\\', '/');
     if (!path.startsWith('assets/')) {
       path = 'assets/' + path;
     }
-
-    // Do not auto-append variants; return the normalized path as stored in DB.
     return path;
   }
 }
