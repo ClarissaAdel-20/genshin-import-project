@@ -120,6 +120,7 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     final groupedCart = _getGroupedCart().values.toList();
     final double totalPrice = _calculateTotalSum();
+    final int totalItemsCount = widget.initialCart.length;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -154,6 +155,12 @@ class _CartPageState extends State<CartPage> {
                       final Weapon weapon = item['weapon'];
                       final int quantity = item['quantity'];
 
+                      // Check ID prefix to determine if it's a Weapon or Artifact
+                      final String commodityType =
+                          weapon.id.toUpperCase().startsWith('A')
+                              ? "Artifact"
+                              : "Weapon";
+
                       return Card(
                         color: AppColors.surface,
                         shape: RoundedRectangleBorder(
@@ -179,9 +186,22 @@ class _CartPageState extends State<CartPage> {
                               style: const TextStyle(
                                   color: AppColors.textDark,
                                   fontWeight: FontWeight.bold)),
-                          subtitle: Text(
-                            "${weapon.price.toStringAsFixed(0)} Primogems x $quantity",
-                            style: const TextStyle(color: AppColors.highlight),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(
+                                "Commodity: $commodityType ($quantity check out)",
+                                style: const TextStyle(
+                                    color: AppColors.textMuted, fontSize: 13),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "${weapon.price.toStringAsFixed(0)} Primogems x $quantity",
+                                style: const TextStyle(
+                                    color: AppColors.highlight, fontSize: 12),
+                              ),
+                            ],
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -210,7 +230,7 @@ class _CartPageState extends State<CartPage> {
           if (groupedCart.isNotEmpty)
             Container(
               padding: const EdgeInsets.all(24.0),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
@@ -219,17 +239,31 @@ class _CartPageState extends State<CartPage> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text("SUBTOTAL SUM",
                           style: TextStyle(
                               color: AppColors.highlight,
                               fontWeight: FontWeight.bold)),
-                      Text(
-                        "${totalPrice.toStringAsFixed(0)} Primogems",
-                        style: const TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "${totalPrice.toStringAsFixed(0)} Primogems",
+                            style: const TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Total Items: $totalItemsCount items checked out",
+                            style: const TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500),
+                          ),
+                        ],
                       ),
                     ],
                   ),

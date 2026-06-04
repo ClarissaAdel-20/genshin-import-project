@@ -39,14 +39,22 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
     }
   }
 
-  void _openWeaponFormDialog([Weapon? existingWeapon]) {
+  // Generic form handler that adapts labels for both Weapons and Artifacts
+  void _openItemFormDialog(
+      [Weapon? existingWeapon, bool forceIsArtifact = false]) {
     final isEditing = existingWeapon != null;
+
+    // Detect if this item is an Artifact based on its ID prefix ('A') or the button clicked
+    final isArtifact = forceIsArtifact ||
+        (isEditing && existingWeapon.id.toUpperCase().startsWith('A'));
+    final itemLabel = isArtifact ? "Artifact" : "Weapon";
 
     final idController = TextEditingController(text: existingWeapon?.id ?? "");
     final nameController =
         TextEditingController(text: existingWeapon?.name ?? "");
-    final typeController =
-        TextEditingController(text: existingWeapon?.type ?? "Sword");
+    final typeController = TextEditingController(
+        text:
+            existingWeapon?.type ?? (isArtifact ? "Flower of Life" : "Sword"));
     final descriptionController =
         TextEditingController(text: existingWeapon?.description ?? "");
     final stockController =
@@ -65,7 +73,9 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
               backgroundColor: AppColors.surface,
               scrollable: true,
               title: Text(
-                isEditing ? "Modify Weapon Profile" : "Add Legendary Commodity",
+                isEditing
+                    ? "Modify $itemLabel Profile"
+                    : "Add Legendary Commodity",
                 style: const TextStyle(
                     color: AppColors.primary, fontWeight: FontWeight.bold),
               ),
@@ -74,13 +84,14 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Weapon ID Input (Read-only during edit)
+                    // Dynamic ID Input Label
                     TextField(
                       controller: idController,
                       enabled: !isEditing,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
-                        labelText: "Unique Weapon Code ID (e.g. W06)",
+                        labelText:
+                            "Unique $itemLabel Code ID (e.g. ${isArtifact ? 'A01' : 'W06'})",
                         labelStyle: const TextStyle(color: AppColors.primary),
                         enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: AppColors.border)),
@@ -88,14 +99,14 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Weapon Name Input
+                    // Dynamic Name Input Label
                     TextField(
                       controller: nameController,
                       style: const TextStyle(color: Colors.black),
-                      decoration: const InputDecoration(
-                        labelText: "Weapon Name",
-                        labelStyle: TextStyle(color: AppColors.primary),
-                        enabledBorder: UnderlineInputBorder(
+                      decoration: InputDecoration(
+                        labelText: "$itemLabel Name",
+                        labelStyle: const TextStyle(color: AppColors.primary),
+                        enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(color: AppColors.border)),
                       ),
                     ),
@@ -241,7 +252,9 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                       }
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Error saving weapon: $e")),
+                        SnackBar(
+                            content: Text(
+                                "Error saving ${itemLabel.toLowerCase()}: $e")),
                       );
                     }
                   },
@@ -249,7 +262,9 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text(isEditing ? "SAVE CHANGES" : "PROVISION WEAPON"),
+                  child: Text(isEditing
+                      ? "SAVE CHANGES"
+                      : "PROVISION ${itemLabel.toUpperCase()}"),
                 ),
               ],
             );
@@ -260,14 +275,18 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
   }
 
   Future<void> _deleteWeapon(String id) async {
+    final isArtifact = id.toUpperCase().startsWith('A');
+    final itemLabel = isArtifact ? "Artifact" : "Weapon";
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text("Purge Weapon",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text(
-            "Are you absolutely certain you want to purge this weapon from the database completely? This action is irreversible."),
+        title: Text("Purge $itemLabel",
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Text(
+            "Are you absolutely certain you want to purge this $context from the database completely? This action is irreversible."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -290,7 +309,7 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error deleting weapon: $e")),
+            SnackBar(content: Text("Error deleting $itemLabel: $e")),
           );
         }
       }
@@ -306,11 +325,34 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textDark,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: AppColors.textDark, size: 28),
-            onPressed: () => _openWeaponFormDialog(),
-            tooltip: "Add Product",
+          // Text Button to add weapon
+          TextButton.icon(
+            onPressed: () => _openItemFormDialog(),
+            icon: const Icon(Icons.add, color: AppColors.primary, size: 18),
+            label: const Text(
+              "ADD WEAPON",
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
+          const SizedBox(width: 8),
+
+          // Text Button to add artifact (passes true to force artifact labels)
+          TextButton.icon(
+            onPressed: () => _openItemFormDialog(null, true),
+            icon: const Icon(Icons.auto_awesome,
+                color: AppColors.primary, size: 18),
+            label: const Text(
+              "ADD ARTIFACT",
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
         ],
       ),
       body: _isLoading
@@ -362,7 +404,7 @@ class _AdminCrudPageState extends State<AdminCrudPage> {
                             IconButton(
                               icon: const Icon(Icons.edit,
                                   color: Color.fromARGB(255, 141, 102, 55)),
-                              onPressed: () => _openWeaponFormDialog(item),
+                              onPressed: () => _openItemFormDialog(item),
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete_outline,
