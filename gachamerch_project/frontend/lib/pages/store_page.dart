@@ -17,7 +17,31 @@ class _StorePageState extends State<StorePage> {
   List<Weapon> _weaponsList = [];
   bool _isLoading = true;
   String _activeCategory = "All";
+  String _sortOrder = "A-Z";
+  String _searchQuery = "";
   final List<Weapon> _cart = [];
+
+  static const _weaponCategories = {
+    'sword',
+    'claymore',
+    'bow',
+    'polearm',
+    'catalyst',
+  };
+
+  static const _artifactCategories = {
+    'flower',
+    'plume',
+    'sands',
+    'goblet',
+    'circlet',
+  };
+
+  static const _categoryTabs = [
+    'All',
+    'Weapon',
+    'Artifacts',
+  ];
 
   @override
   void initState() {
@@ -60,13 +84,33 @@ class _StorePageState extends State<StorePage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredWeapons = _activeCategory == "All"
-        ? _weaponsList
-        : _weaponsList.where((w) {
-            final typeLower = w.type.toLowerCase();
-            final categoryLower = _activeCategory.toLowerCase();
-            return typeLower.contains(categoryLower);
-          }).toList();
+    final queryLower = _searchQuery.trim().toLowerCase();
+    List<Weapon> filteredWeapons = _weaponsList.where((w) {
+      final nameLower = w.name.toLowerCase();
+      final typeLower = w.type.toLowerCase();
+      final matchesSearch = queryLower.isEmpty ||
+          nameLower.contains(queryLower) ||
+          typeLower.contains(queryLower);
+
+      final matchesCategory = _activeCategory == 'All' ||
+          (_activeCategory == 'Weapon' &&
+              _weaponCategories
+                  .any((keyword) => typeLower.contains(keyword))) ||
+          (_activeCategory == 'Artifacts' &&
+              _artifactCategories
+                  .any((keyword) => typeLower.contains(keyword)));
+
+      return matchesSearch && matchesCategory;
+    }).toList();
+
+    if (_sortOrder == 'A-Z') {
+      filteredWeapons
+          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    } else if (_sortOrder == 'Z-A') {
+      filteredWeapons
+          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      filteredWeapons = filteredWeapons.reversed.toList();
+    }
 
     final isAdmin = ApiService.currentSession?.role == "admin";
 
@@ -191,7 +235,7 @@ class _StorePageState extends State<StorePage> {
                     Text(
                       "Privilege: ${ApiService.currentSession?.role.toUpperCase() ?? 'USER'}",
                       style: const TextStyle(
-                          color: Color.fromARGB(255, 246, 190, 121),
+                          color: Color.fromARGB(255, 113, 74, 26),
                           fontSize: 12),
                     ),
                   ],
@@ -206,19 +250,7 @@ class _StorePageState extends State<StorePage> {
             height: 64,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              children: [
-                "All",
-                "Sword",
-                "Claymore",
-                "Bow",
-                "Polearm",
-                "Catalyst",
-                "Flower",
-                "Plume",
-                "Sands",
-                "Goblet",
-                "Circlet"
-              ].map((category) {
+              children: _categoryTabs.map((category) {
                 final isSelected = _activeCategory == category;
                 return GestureDetector(
                   onTap: () {
@@ -257,6 +289,100 @@ class _StorePageState extends State<StorePage> {
             ),
           ),
 
+          // Search and sort controls
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Sort by:',
+                        style: TextStyle(
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      PopupMenuButton<String>(
+                        tooltip: 'Sort options',
+                        position: PopupMenuPosition.under,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.border),
+                            color: AppColors.surface,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(_sortOrder == 'A-Z'
+                                  ? 'A - Z'
+                                  : _sortOrder == 'Z-A'
+                                      ? 'Z - A'
+                                      : 'Sort'),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                        ),
+                        itemBuilder: (context) => const [
+                          PopupMenuItem(value: 'A-Z', child: Text('A - Z')),
+                          PopupMenuItem(value: 'Z-A', child: Text('Z - A')),
+                        ],
+                        onSelected: (value) {
+                          setState(() {
+                            if (_sortOrder == value) {
+                              _sortOrder = '';
+                            } else {
+                              _sortOrder = value;
+                            }
+                          });
+                        },
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${filteredWeapons.length} items',
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                SizedBox(
+                  width: 240,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: AppColors.surface,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // Product Inventory Mesh Grid
           Expanded(
             child: _isLoading
@@ -264,7 +390,8 @@ class _StorePageState extends State<StorePage> {
                     child: CircularProgressIndicator(color: AppColors.primary))
                 : filteredWeapons.isEmpty
                     ? const Center(
-                        child: Text("No weapon commodities found in inventory.",
+                        child: Text(
+                            "No artifacts commodities found in inventory.",
                             style: TextStyle(
                                 color: Color.fromARGB(255, 146, 89, 19))))
                     : GridView.builder(

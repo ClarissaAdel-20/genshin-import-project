@@ -185,6 +185,39 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             fontSize: 22,
                             fontWeight: FontWeight.w600),
                       ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.inventory_2,
+                              size: 18,
+                              color:
+                                  outOfStock ? Colors.red : AppColors.textDark,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Stock: ${weapon.stock}',
+                              style: TextStyle(
+                                color: outOfStock
+                                    ? Colors.red
+                                    : AppColors.textDark,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       const Divider(color: AppColors.border, height: 40),
 
                       // Description / Item Lore notes
