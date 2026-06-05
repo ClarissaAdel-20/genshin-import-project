@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS artifacts (
   description TEXT,
   stock INT NOT NULL DEFAULT 0,
   image_icon VARCHAR(255),
+  image_full VARCHAR(255),
   price DECIMAL(10, 2) NOT NULL
 );
 
@@ -71,20 +72,20 @@ INSERT INTO weapons (id, name, type, description, stock, image_icon, image_full,
 ON DUPLICATE KEY UPDATE id=id;
 
 -- 8. Artifacts --
-INSERT INTO artifacts (id, name, type, description, stock, image_icon, price) VALUES
-('A01', 'Maidens Distance Love', 'Flower of Life', 'A carefully preserved flower symbolizing pure affection and unwavering devotion.', 25, 'assets/artifacts/A01_Maidens_Distant_Love.png', 648000),
-('A02', 'Thundersoother Diadem', 'Circlet of Logos', 'A ceremonial crown worn by those who sought protection from relentless thunderstorms.', 25, 'assets/artifacts/A02_Thundersoothers_Diadem.png', 648000),
-('A03', 'Frost Weaved Dignity', 'Goblet of Eonothem', 'An ornate vessel embodying the pride and resilience of a land bound by ice.', 25, 'assets/artifacts/A03_Frost-Weaved_Dignity.png', 648000),
-('A04', 'Thundering Poise', 'Circlet of Logos', 'A crown representing composure and authority amid the fury of thunder.', 25, 'assets/artifacts/A04_Thundering_Poise.png', 648000),
-('A05', 'Symbol of Felicitation', 'Sands of Eon', 'A timepiece commemorating blessings, celebrations, and good fortune.', 25, 'assets/artifacts/A05_Symbol_of_Felicitation.png', 648000),
-('A06', 'End of the Golden Realm', 'Flower of Life', 'A flower marking the fading glory of a once-prosperous golden kingdom.', 25, 'assets/artifacts/A06_End_of_the_Golden_Realm.png', 648000),
-('A07', 'Odyssean Flower', 'Flower of Life', 'A blossom carried by travelers as a reminder of distant journeys and homecomings.', 25, 'assets/artifacts/A07_Odyssean_Flower.png', 648000),
-('A08', 'Golden Nights Bustle', 'Goblet of Eonothem', 'A lavish cup that recalls the splendor and festivities of prosperous evenings.', 25, 'assets/artifacts/A08_Golden_Nights_Bustle.png', 648000),
-('A09', 'Echoing Sound From Days Past', 'Sands of Eon', 'An ancient relic that preserves the lingering memories of bygone eras.', 25, 'assets/artifacts/A09_Echoing_Sound_From_Days_Past.png', 648000),
-('A10', 'Dyed Tassel', 'Plume of Death', 'A feather ornament colored by time and tradition, carrying traces of its former owner.', 25, 'assets/artifacts/A10_Dyed_Tassel.png', 648000),
-('A11', 'Moonlit Offerings Opulent Dream', 'Flower of Life', 'A flower representing beautiful aspirations offered beneath the moonlight.', 25, 'assets/artifacts/A11_Moonlit_Offerings_Opulent_Dream.png', 648000),
-('A12', 'Sharpness That Ceased Upon Wondrous Creation', 'Plume of Death', 'A plume symbolizing how the pursuit of beauty can surpass the need for conflict.', 25, 'assets/artifacts/A12_Sharpness_That_Ceased_Upon_Wondrous_Creation.png', 648000),
-('A13', 'Faithful Hourglass', 'Sands of Eon', 'A sandglass reflecting steadfast dedication through the passage of time.', 25, 'assets/artifacts/A13_Faithful_Hourglass.png', 648000),
-('A14', 'Wilting Feast', 'Goblet of Eonothem', 'A goblet that serves as a reminder that even grand celebrations eventually fade away.', 25, 'assets/artifacts/A14_Wilting_Feast.png', 648000),
-('A15', 'Lamp of the Lost', 'Goblet of Eonothem', 'A vessel whose light once guided wandering souls through darkness and uncertainty.', 25, 'assets/artifacts/A15_Lamp_of_the_Lost.png', 648000)
+INSERT INTO artifacts (id, name, type, description, stock, image_icon, image_full, price) VALUES
+('A01', 'Maidens Distance Love', 'Flower of Life', 'A carefully preserved flower symbolizing pure affection and unwavering devotion.', 25, 'assets/artifacts/A01_Maidens_Distant_Love.png', 'assets/artifacts/A01_Maidens_Distant_Love.png', 648000),
+('A02', 'Thundersoother Diadem', 'Circlet of Logos', 'A ceremonial crown worn by those who sought protection from relentless thunderstorms.', 25, 'assets/artifacts/A02_Thundersoothers_Diadem.png', 'assets/artifacts/A02_Thundersoothers_Diadem.png', 648000),
+('A03', 'Frost Weaved Dignity', 'Goblet of Eonothem', 'An ornate vessel embodying the pride and resilience of a land bound by ice.', 25, 'assets/artifacts/A03_Frost-Weaved_Dignity.png', 'assets/artifacts/A03_Frost-Weaved_Dignity.png', 648000),
+('A04', 'Thundering Poise', 'Circlet of Logos', 'A crown representing composure and authority amid the fury of thunder.', 25, 'assets/artifacts/A04_Thundering_Poise.png', 'assets/artifacts/A04_Thundering_Poise.png', 648000),
+('A05', 'Symbol of Felicitation', 'Sands of Eon', 'A timepiece commemorating blessings, celebrations, and good fortune.', 25, 'assets/artifacts/A05_Symbol_of_Felicitation.png', 'assets/artifacts/A05_Symbol_of_Felicitation.png', 648000),
+('A06', 'End of the Golden Realm', 'Flower of Life', 'A flower marking the fading glory of a once-prosperous golden kingdom.', 25, 'assets/artifacts/A06_End_of_the_Golden_Realm.png', 'assets/artifacts/A06_End_of_the_Golden_Realm.png', 648000),
+('A07', 'Odyssean Flower', 'Flower of Life', 'A blossom carried by travelers as a reminder of distant journeys and homecomings.', 25, 'assets/artifacts/A07_Odyssean_Flower.png', 'assets/artifacts/A07_Odyssean_Flower.png', 648000),
+('A08', 'Golden Nights Bustle', 'Goblet of Eonothem', 'A lavish cup that recalls the splendor and festivities of prosperous evenings.', 25, 'assets/artifacts/A08_Golden_Nights_Bustle.png', 'assets/artifacts/A08_Golden_Nights_Bustle.png', 648000),
+('A09', 'Echoing Sound From Days Past', 'Sands of Eon', 'An ancient relic that preserves the lingering memories of bygone eras.', 25, 'assets/artifacts/A09_Echoing_Sound_From_Days_Past.png', 'assets/artifacts/A09_Echoing_Sound_From_Days_Past.png', 648000),
+('A10', 'Dyed Tassel', 'Plume of Death', 'A feather ornament colored by time and tradition, carrying traces of its former owner.', 25, 'assets/artifacts/A10_Dyed_Tassel.png', 'assets/artifacts/A10_Dyed_Tassel.png', 648000),
+('A11', 'Moonlit Offerings Opulent Dream', 'Flower of Life', 'A flower representing beautiful aspirations offered beneath the moonlight.', 25, 'assets/artifacts/A11_Moonlit_Offerings_Opulent_Dream.png', 'assets/artifacts/A11_Moonlit_Offerings_Opulent_Dream.png', 648000),
+('A12', 'Sharpness That Ceased Upon Wondrous Creation', 'Plume of Death', 'A plume symbolizing how the pursuit of beauty can surpass the need for conflict.', 25, 'assets/artifacts/A12_Sharpness_That_Ceased_Upon_Wondrous_Creation.png', 'assets/artifacts/A12_Sharpness_That_Ceased_Upon_Wondrous_Creation.png', 648000),
+('A13', 'Faithful Hourglass', 'Sands of Eon', 'A sandglass reflecting steadfast dedication through the passage of time.', 25, 'assets/artifacts/A13_Faithful_Hourglass.png', 'assets/artifacts/A13_Faithful_Hourglass.png', 648000),
+('A14', 'Wilting Feast', 'Goblet of Eonothem', 'A goblet that serves as a reminder that even grand celebrations eventually fade away.', 25, 'assets/artifacts/A14_Wilting_Feast.png', 'assets/artifacts/A14_Wilting_Feast.png', 648000),
+('A15', 'Lamp of the Lost', 'Goblet of Eonothem', 'A vessel whose light once guided wandering souls through darkness and uncertainty.', 25, 'assets/artifacts/A15_Lamp_of_the_Lost.png', 'assets/artifacts/A15_Lamp_of_the_Lost.png', 648000)
 ON DUPLICATE KEY UPDATE id=id;
