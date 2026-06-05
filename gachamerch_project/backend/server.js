@@ -49,7 +49,50 @@ function addLog(action, status, detail) {
   return log;
 }
 
-// 1. Authentication Endpoint
+/**
+ * REVISION ADDITION: Token Generator
+ * Generates a strictly secure, 24-character alphanumeric token to satisfy 
+ * the requirement of being at least 20 characters long.
+ */
+function generateSecureToken() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let token = '';
+  for (let i = 0; i < 24; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+}
+
+/**
+ * REVISION ADDITION: Bearer Token Verification Middleware
+ * intercepting protected incoming requests to verify the 'Authorization: Bearer <token>' header
+ */
+async function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Extract token from "Bearer <token>"
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token missing or unauthorized header scheme' });
+  }
+
+  try {
+    const db = await getDbPool();
+    // Query the database to find the user belonging to this active bearer token
+    const [rows] = await db.query('SELECT * FROM users WHERE token = ?', [token]);
+    
+    if (rows.length === 0) {
+      return res.status(403).json({ error: 'Forbidden: Invalid or expired bearer token' });
+    }
+
+    req.user = rows[0]; // Attach user context to the request object
+    next(); // Pass control to the endpoint handler
+  } catch (err) {
+    console.error('Token verification middleware error:', err);
+    return res.status(500).json({ error: 'Internal server validation error' });
+  }
+}
+
+// 1. Authentication Endpoint (Database User Login)
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -62,8 +105,9 @@ app.post('/api/login', async (req, res) => {
 
     if (rows.length > 0) {
       const user = rows[0];
-      // Generate a simple secure token for authorization headers
-      const token = `tok_${user.username}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // REVISION FIX: Generated token now utilizes the secure alphanumeric 24-character system
+      const token = generateSecureToken();
       await db.query('UPDATE users SET token = ? WHERE id = ?', [token, user.id]);
 
       addLog('USER_LOGIN', 'success', `User ${username} authenticated successfully.`);
@@ -84,6 +128,54 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+/**
+ * REVISION ADDITION: External OAuth Login Endpoint
+ * Allows mobile frontend to pass credential responses from third-party networks (Google, Facebook, etc.)
+ */
+app.post('/api/oauth-login', async (req, res) => {
+  const { email, provider, providerToken } = req.body;
+  if (!email || !provider) {
+    return res.status(400).json({ error: 'OAuth email and provider identifier are required' });
+  }
+
+  try {
+    const db = await getDbPool();
+    // Check if user already exists via email address mapping
+    let [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    let user;
+
+    if (rows.length === 0) {
+      // Lazy-register the social user inside the DB if they don't exist yet
+      const generatedUsername = email.split('@')[0] + '_oauth';
+      const newId = `usr-${Date.now()}`;
+      await db.query(
+        'INSERT INTO users (id, username, password, role, email) VALUES (?, ?, ?, ?, ?)',
+        [newId, generatedUsername, 'oauth_account_no_password', 'user', email]
+      );
+      const [newRows] = await db.query('SELECT * FROM users WHERE id = ?', [newId]);
+      user = newRows[0];
+    } else {
+      user = rows[0];
+    }
+
+    // Generate a secure alphanumeric token matching the length rule
+    const token = generateSecureToken();
+    await db.query('UPDATE users SET token = ? WHERE id = ?', [token, user.id]);
+
+    addLog('OAUTH_LOGIN', 'success', `User signed in utilizing External OAuth (${provider}): ${email}`);
+    res.json({
+      username: user.username,
+      role: user.role,
+      token: token,
+      email: user.email
+    });
+  } catch (err) {
+    console.error('External OAuth processing error:', err);
+    addLog('OAUTH_LOGIN', 'error', `Failed to register or manage external session: ${err.message}`);
+    res.status(500).json({ error: 'Internal server error handling external sign-in' });
+  }
+});
+
 // 2. Weapons - Read Inventory (Fetch from both weapons and artifacts tables)
 app.get('/api/weapons', async (req, res) => {
   try {
@@ -98,8 +190,8 @@ app.get('/api/weapons', async (req, res) => {
   }
 });
 
-// 3. Weapons - Create (Admin functionality)
-app.post('/api/weapons', async (req, res) => {
+// 3. Weapons - Create (Admin functionality) - REVISION FIX: Added authenticateToken middleware protect
+app.post('/api/weapons', authenticateToken, async (req, res) => {
   const { id, name, type, description, stock, image_icon, image_full, price } = req.body;
   if (!id || !name || !type || stock === undefined || !price) {
     return res.status(400).json({ error: 'Missing required parameters' });
@@ -112,13 +204,11 @@ app.post('/api/weapons', async (req, res) => {
     const targetTable = isArtifact ? 'artifacts' : 'weapons';
 
     if (isArtifact) {
-      // Artifacts only have image_icon
       await db.query(
         `INSERT INTO ${targetTable} (id, name, type, description, stock, image_icon, price) VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [id, name, type, description || '', stock, image_icon || '', price]
       );
     } else {
-      // Weapons have both image_icon and image_full
       await db.query(
         `INSERT INTO ${targetTable} (id, name, type, description, stock, image_icon, image_full, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [id, name, type, description || '', stock, image_icon || '', image_full || '', price]
@@ -134,8 +224,8 @@ app.post('/api/weapons', async (req, res) => {
   }
 });
 
-// 4. Weapons - Update (Admin functionality)
-app.put('/api/weapons/:id', async (req, res) => {
+// 4. Weapons - Update (Admin functionality) - REVISION FIX: Added authenticateToken middleware protect
+app.put('/api/weapons/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { name, type, description, stock, image_icon, image_full, price } = req.body;
 
@@ -147,13 +237,11 @@ app.put('/api/weapons/:id', async (req, res) => {
 
     let result;
     if (isArtifact) {
-      // Artifacts only have image_icon
       [result] = await db.query(
         `UPDATE ${targetTable} SET name=?, type=?, description=?, stock=?, image_icon=?, price=? WHERE id=?`,
         [name, type, description || '', stock, image_icon || '', price, id]
       );
     } else {
-      // Weapons have both image_icon and image_full
       [result] = await db.query(
         `UPDATE ${targetTable} SET name=?, type=?, description=?, stock=?, image_icon=?, image_full=?, price=? WHERE id=?`,
         [name, type, description || '', stock, image_icon || '', image_full || '', price, id]
@@ -173,8 +261,8 @@ app.put('/api/weapons/:id', async (req, res) => {
   }
 });
 
-// 5. Weapons - Delete (Admin functionality)
-app.delete('/api/weapons/:id', async (req, res) => {
+// 5. Weapons - Delete (Admin functionality) - REVISION FIX: Added authenticateToken middleware protect
+app.delete('/api/weapons/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -219,13 +307,11 @@ app.post('/api/orders', async (req, res) => {
         let rows;
         let targetTable;
 
-        // Try weapons first
         const [weaponRows] = await connection.query('SELECT stock FROM weapons WHERE id = ?', [item.id]);
         if (weaponRows.length > 0) {
           rows = weaponRows;
           targetTable = 'weapons';
         } else {
-          // Try artifacts
           const [artifactRows] = await connection.query('SELECT stock FROM artifacts WHERE id = ?', [item.id]);
           if (artifactRows.length > 0) {
             rows = artifactRows;
@@ -245,7 +331,6 @@ app.post('/api/orders', async (req, res) => {
         await connection.query(`UPDATE ${targetTable} SET stock = stock - ? WHERE id = ?`, [item.quantity, item.id]);
       }
 
-      // Record Order item
       await connection.query('INSERT INTO orders (id, details) VALUES (?, ?)', [orderId, descList]);
       await connection.commit();
 

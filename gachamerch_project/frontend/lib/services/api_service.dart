@@ -58,7 +58,6 @@ class Weapon {
     };
   }
 
-  // Get the asset path normalized for Flutter asset loading
   String getAssetPath([String? imagePath]) {
     final pathToNormalize = (imagePath ?? imageIcon).trim();
     if (pathToNormalize.isEmpty) return '';
@@ -97,11 +96,9 @@ class UserSession {
 }
 
 class ApiService {
-  // Can points to localhost for local android/iOS emulator, or full URL
   static String baseUrl = "http://localhost:3000";
   static UserSession? currentSession;
 
-  // Set Authorization headers using Bearer scheme
   static Map<String, String> getHeaders() {
     final headers = {
       'Content-Type': 'application/json',
@@ -112,7 +109,7 @@ class ApiService {
     return headers;
   }
 
-  // 1. Authenticate user credentials
+  // 1. Authenticate regular user credentials stored in DB
   static Future<UserSession> login(String username, String password) async {
     final response = await http.post(
       Uri.parse("$baseUrl/api/login"),
@@ -130,12 +127,37 @@ class ApiService {
     }
   }
 
-  // 2. Clear Session (Log out)
+  /**
+   * REVISION ADDITION: External OAuth Login Network Handshake
+   * Sends third-party login requests directly to your updated Node backend
+   */
+  static Future<UserSession> loginWithOAuth(
+      String email, String provider) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/oauth-login"),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'provider': provider,
+        'providerToken': 'mock_oauth_client_handshake_token'
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      currentSession = UserSession.fromJson(data);
+      return currentSession!;
+    } else {
+      final errorMsg =
+          jsonDecode(response.body)['error'] ?? "External OAuth login failed";
+      throw Exception(errorMsg);
+    }
+  }
+
   static void logout() {
     currentSession = null;
   }
 
-  // 3. Fetch list of available inventory weapons
   static Future<List<Weapon>> fetchWeapons() async {
     final response = await http.get(
       Uri.parse("$baseUrl/api/weapons"),
@@ -150,7 +172,6 @@ class ApiService {
     }
   }
 
-  // 4. Create new weapon (Admin role required)
   static Future<void> createWeapon(Weapon weapon) async {
     final response = await http.post(
       Uri.parse("$baseUrl/api/weapons"),
@@ -165,7 +186,6 @@ class ApiService {
     }
   }
 
-  // 5. Update weapon (Admin role required)
   static Future<void> updateWeapon(Weapon weapon) async {
     final response = await http.put(
       Uri.parse("$baseUrl/api/weapons/${weapon.id}"),
@@ -180,7 +200,6 @@ class ApiService {
     }
   }
 
-  // 6. Delete weapon (Admin role required)
   static Future<void> deleteWeapon(String weaponId) async {
     final response = await http.delete(
       Uri.parse("$baseUrl/api/weapons/$weaponId"),
@@ -194,7 +213,6 @@ class ApiService {
     }
   }
 
-  // 7. Process Order Checkout transaction
   static Future<void> checkoutOrder(List<Map<String, dynamic>> items) async {
     final response = await http.post(
       Uri.parse("$baseUrl/api/orders"),

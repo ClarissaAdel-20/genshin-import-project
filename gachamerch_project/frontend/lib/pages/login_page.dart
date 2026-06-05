@@ -1,22 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'store_page.dart';
-import '../theme.dart';
-
-// Custom scroll behavior to remove scrollbars and overscroll glow
-class NoScrollbarBehavior extends MaterialScrollBehavior {
-  @override
-  Widget buildOverscrollIndicator(
-      BuildContext context, Widget child, ScrollableDetails details) {
-    return child;
-  }
-
-  @override
-  Widget buildScrollbar(
-      BuildContext context, Widget child, ScrollableDetails details) {
-    return child;
-  }
-}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,272 +10,247 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _usernameController =
-      TextEditingController(text: 'user');
-  final TextEditingController _passwordController =
-      TextEditingController(text: 'password123');
-  final TextEditingController _serverUrlController =
-      TextEditingController(text: ApiService.baseUrl);
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isLoading = false;
-  String? _errorMessage;
 
-  Future<void> _handleLogin() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  // Navigates directly to the store page silently storing the token in the background
+  void _navigateToStore() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const StorePage()),
+    );
+  }
 
+  // 1. Regular Database Login (Checks admin/user with password123)
+  void _handleStandardLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
     try {
-      // Overwrite the dynamic API Server base URL if changed in the configuration settings
-      ApiService.baseUrl = _serverUrlController.text.trim();
-
       await ApiService.login(
         _usernameController.text.trim(),
-        _passwordController.text.trim(),
+        _passwordController.text,
       );
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const StorePage()),
-        );
-      }
+      setState(() => _isLoading = false);
+      _navigateToStore(); // Seamless transition to store page
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst("Exception: ", "");
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Login Error: ${e.toString().replaceAll('Exception:', '')}')),
+      );
+    }
+  }
+
+  // 2. Realistic Google Account Selector Modal (External OAuth Simulation)
+  void _showGoogleAccountSelector() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Image.network(
+                      'https://cdnjs.cloudflare.com/ajax/libs/gapi-signer/0.0.1/google.png',
+                      height: 24,
+                      width: 24,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.g_mobiledata, color: Colors.blue),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Sign in with Google',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Choose an account to continue to Genshin Import',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Colors.deepPurple,
+                    child: Text('T', style: TextStyle(color: Colors.white)),
+                  ),
+                  title: const Text('Traveler Aether'),
+                  subtitle: const Text('traveler.genshin@gmail.com'),
+                  onTap: () => _executeOAuthLogin('traveler.genshin@gmail.com'),
+                ),
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Colors.blue,
+                    child: Text('P', style: TextStyle(color: Colors.white)),
+                  ),
+                  title: const Text('Paimon Emergency'),
+                  subtitle: const Text('paimon.food@gmail.com'),
+                  onTap: () => _executeOAuthLogin('paimon.food@gmail.com'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Completes the backend API login route handshake following account selection
+  void _executeOAuthLogin(String email) async {
+    Navigator.pop(context); // Close the selector sheet
+    setState(() => _isLoading = true);
+    try {
+      await ApiService.loginWithOAuth(email, "google");
+      setState(() => _isLoading = false);
+      _navigateToStore(); // Silently log in and open the shop page
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('OAuth Error: ${e.toString()}')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.background, AppColors.surface],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: ScrollConfiguration(
-            behavior: NoScrollbarBehavior(),
-            child: SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 24),
-                  const Text(
-                    "Genshin Import",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 46,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                      height: 1.05,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Log in below to access your import hub and manage assets securely.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Card(
-                    color: AppColors.surface.withOpacity(0.95),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: const BorderSide(
-                        color: AppColors.border,
-                        width: 1.5,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Card(
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Visual icon logo removed as requested
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Genshin Import', // Updated heading text
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 28, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0, vertical: 32.0),
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 400),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Branding Core Logo
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                    color: AppColors.primary, width: 1.5),
-                              ),
-                              child: const Icon(
-                                Icons.vpn_key,
-                                color: AppColors.border,
-                                size: 32,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              "GachaMerch Hub",
-                              style: TextStyle(
-                                color: AppColors.textDark,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // API Host configuration
-                            TextField(
-                              controller: _serverUrlController,
-                              style: const TextStyle(color: AppColors.textDark),
-                              decoration: InputDecoration(
-                                labelText: "Express Server Endpoint Base",
-                                labelStyle:
-                                    const TextStyle(color: AppColors.textMuted),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: AppColors.primary),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                prefixIcon: const Icon(Icons.dns,
-                                    color: AppColors.textMuted),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Username field
-                            TextField(
-                              controller: _usernameController,
-                              style: const TextStyle(color: AppColors.textDark),
-                              decoration: InputDecoration(
-                                labelText: "Username",
-                                labelStyle:
-                                    const TextStyle(color: AppColors.textMuted),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: AppColors.primary),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                prefixIcon: const Icon(Icons.person_outline,
-                                    color: AppColors.textMuted),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Password field
-                            TextField(
-                              controller: _passwordController,
-                              obscureText: true,
-                              style: const TextStyle(color: AppColors.textDark),
-                              decoration: InputDecoration(
-                                labelText: "Password",
-                                labelStyle:
-                                    const TextStyle(color: AppColors.textMuted),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: AppColors.border),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: AppColors.primary),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                prefixIcon: const Icon(Icons.lock_outline,
-                                    color: AppColors.textMuted),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-
-                            // Error Banner
-                            if (_errorMessage != null)
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.redAccent.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color: Colors.redAccent.withOpacity(0.5)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.error_outline,
-                                        color: Colors.redAccent, size: 20),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        _errorMessage!,
-                                        style: const TextStyle(
-                                            color: Colors.redAccent,
-                                            fontSize: 13),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            const SizedBox(height: 24),
-
-                            // Submit trigger button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _handleLogin,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                            color: Colors.black,
-                                            strokeWidth: 2),
-                                      )
-                                    : const Text(
-                                        "LOGIN",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                              ),
-                            ),
-                          ],
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Genshin Impact Imports Hub',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 32),
+                      TextFormField(
+                        controller: _usernameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Username',
+                          prefixIcon: Icon(Icons.person),
+                          border: OutlineInputBorder(),
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your account username';
+                          }
+                          return null;
+                        },
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: Icon(Icons.lock),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your account password';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      _isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: _handleStandardLogin,
+                              child: const Text('Sign In',
+                                  style: TextStyle(fontSize: 16)),
+                            ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Expanded(child: Divider(thickness: 1)),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Text('OR',
+                                style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                          Expanded(child: Divider(thickness: 1)),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: const BorderSide(color: Colors.grey),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: Image.network(
+                          'https://cdnjs.cloudflare.com/ajax/libs/gapi-signer/0.0.1/google.png',
+                          height: 20,
+                          width: 20,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.g_mobiledata,
+                                  color: Colors.blue, size: 20),
+                        ),
+                        label: const Text(
+                          'Sign In with Google',
+                          style: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600),
+                        ),
+                        onPressed:
+                            _isLoading ? null : _showGoogleAccountSelector,
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
