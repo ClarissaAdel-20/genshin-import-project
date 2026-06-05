@@ -48,6 +48,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the available image path (falls back to weapon.image if imageFull is empty)
+    final String assetPathToShow = weapon.imageFull.isNotEmpty
+        ? weapon.getAssetPath(weapon.imageFull)
+        : weapon.getAssetPath();
+
+    final bool hasValidImage =
+        weapon.imageFull.isNotEmpty || weapon.image.isNotEmpty;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -61,7 +69,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Left Side: Product Image
+            // Left Side: Product Image (Original Constraints Maintained Exactly)
             Expanded(
               flex: 1,
               child: Container(
@@ -75,9 +83,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     Center(
                       child: Hero(
                         tag: 'item-${weapon.id}',
-                        child: weapon.imageFull.isNotEmpty
-                            ? Image.asset(weapon.getAssetPath(weapon.imageFull),
-                                fit: BoxFit.contain)
+                        // FIX: Checked against both image states to ensure artifacts render safely
+                        child: hasValidImage
+                            ? Image.asset(
+                                assetPathToShow,
+                                fit: BoxFit.contain,
+                              )
                             : const Icon(Icons.shield,
                                 color: AppColors.textMuted, size: 120),
                       ),
